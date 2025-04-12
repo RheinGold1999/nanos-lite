@@ -14,8 +14,8 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
 
   extern size_t ramdisk_read(void *buf, size_t offset, size_t len);
 
-  ramdisk_read((void *)0x83000000, 0, 0x06dc4);
-  ramdisk_read((void *)0x83007000, 0x00898, 0x00898);
+  ramdisk_read((void *)0x83000000, 0, 0x06dd0);
+  ramdisk_read((void *)0x83007000, 0x007000, 0x00898);
 
   memset((void *)(0x83007000 + 0x00898), 0, (0x008d4 - 0x00898));
   return (uintptr_t) 0x83004e6c;
