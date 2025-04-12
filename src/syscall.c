@@ -35,7 +35,13 @@ void do_syscall(Context *c) {
       }
       c->mepc += 4;
       break;
-
+      
+      case SYS_brk:
+        void *brk = (void *) c->GPR2;
+        Log("SYS_brk: brk=%p", brk);
+        c->GPRx = 0;
+        c->mepc += 4;
+        break;
 
     default: panic("Unhandled syscall ID = %d", a[0]);
   }
