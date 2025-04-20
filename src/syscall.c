@@ -5,39 +5,61 @@
 void do_syscall(Context *c) {
   uintptr_t a[4];
   a[0] = c->GPR1;
+  int fd = c->GPR2;
+  void *buf = (void *) c->GPR3;
+  size_t count = (size_t) c->GPR4;
 
   switch (a[0]) {
     case SYS_exit:
-      Log("SYS_exit: call halt(c->GPR2)"); // c->GPR2 stores status for SYS_exit
+      Log("SYS_exit: call halt(%d)", c->GPR2); // c->GPR2 stores status for SYS_exit
       halt(c->GPR2);
-      c->mepc += 4;
       c->GPRx = 0;
+      c->mepc += 4;
       break;
 
     case SYS_yield:
       Log("SYS_yield: call yield()");
       yield();
-      c->mepc += 4;
       c->GPRx = 0;
+      c->mepc += 4;
+      break;
+
+    case SYS_open:
+      const char *path = (const char *)c->GPR2;
+      Log("SYS_open: %s", path);
+      c->GPRx = fs_open(path, 0, 0);
+      c->mepc += 4;
+      break;
+
+    case SYS_close:
+      Log("SYS_close: fd=%d", fd);
+      fs_close(fd);
+      c->GPRx = 0;
+      c->mepc += 4;
+      break;
+
+    case SYS_lseek:
+      size_t offset = (size_t)c->GPR3;
+      int whence = c->GPR4;
+      Log("SYS_lseek: fd=%d, offset=%d, whence=%d", fd, offset, whence);
+      c->GPRx = fs_lseek(fd, offset, whence);
+      c->mepc += 4;
+      break;
+
+    case SYS_read:
+      Log("SYS_read: fd=%d, buf=%p, count=%d", fd, buf, count);
+      if (file_table[fd].read != NULL) {
+        c->GPRx = file_table[fd].read(buf, 0, count);
+      } else {
+        c->GPRx = fs_read(fd, buf, count);
+      }
+      c->mepc += 4;
       break;
 
     case SYS_write:
-      int fd = c->GPR2;
-      const void *buf = (const void *) c->GPR3;
-      size_t count = (size_t) c->GPR4;
       Log("SYS_write: fd=%d, buf=%p, count=%d", fd, buf, count);
-      // if (fd == 1 || fd == 2) {
-      //   for (size_t i = 0; i < count; ++i) {
-      //     putch(buf[i]);
-      //   }
-      //   c->GPRx = count;
-      // } else {
-      //   Log("SYS_write: fd not supported yet");
-      //   c->GPRx = -1;
-      // }
-      // assert(0 <= fd && fd < LENGTH(file_table));
       if (file_table[fd].write != NULL) {
-        c->GPRx = file_table[fd].write(buf, 0, count);
+        c->GPRx = file_table[fd].write(buf, file_table[fd].open_offset, count);
       } else {
         c->GPRx = fs_write(fd, buf, count);
       }
