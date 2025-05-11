@@ -41,8 +41,10 @@ void do_syscall(Context *c) {
     case SYS_lseek:
       size_t offset = (size_t)c->GPR3;
       int whence = c->GPR4;
-      Log("SYS_lseek: fd=%d, offset=%d, whence=%d", fd, offset, whence);
+      Log("SYS_lseek: fd=%d, offset=%d, whence=%d",fd, offset, whence);
+      Log("fd=%d, prev open_offset=%d", fd, file_table[fd].open_offset);
       c->GPRx = fs_lseek(fd, offset, whence);
+      Log("fd=%d, cuur open_offset=%d", fd, file_table[fd].open_offset);
       c->mepc += 4;
       break;
 

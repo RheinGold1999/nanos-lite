@@ -46,11 +46,13 @@ size_t dispinfo_read(void *buf, size_t offset, size_t len) {
 }
 
 size_t fb_write(const void *buf, size_t offset, size_t len) {
+  assert(offset % 4 == 0);
+  assert(len % 4 == 0);
   AM_GPU_CONFIG_T cfg = io_read(AM_GPU_CONFIG);
-  int x = offset % cfg.width;
-  int y = offset / cfg.width;
-  Log("x = %d, y = %d, len = %d", x, y, len);
-  io_write(AM_GPU_FBDRAW, x, y, (void *)buf, len, 1, true);
+  int x = (offset / 4) % cfg.width;
+  int y = (offset / 4) / cfg.width;
+  Log("x = %d, y = %d, buf = %p, len = %d", x, y, buf, len);
+  io_write(AM_GPU_FBDRAW, x, y, (void *)buf, (len / 4), 1, true);
   return len;
 }
 
