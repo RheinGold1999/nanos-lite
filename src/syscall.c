@@ -26,13 +26,13 @@ void do_syscall(Context *c) {
 
     case SYS_open:
       const char *path = (const char *)c->GPR2;
-      Log("SYS_open: %s", path);
+      Log("SYS_open: fd=%d, file=%s", fd, path);
       c->GPRx = fs_open(path, 0, 0);
       c->mepc += 4;
       break;
 
     case SYS_close:
-      Log("SYS_close: fd=%d", fd);
+      Log("SYS_close: fd=%d, file=%s", fd, fs_name(fd));
       fs_close(fd);
       c->GPRx = 0;
       c->mepc += 4;
@@ -42,14 +42,14 @@ void do_syscall(Context *c) {
       size_t offset = (size_t)c->GPR3;
       int whence = c->GPR4;
       Log("SYS_lseek: fd=%d, offset=%d, whence=%d",fd, offset, whence);
-      Log("fd=%d, prev open_offset=%d", fd, file_table[fd].open_offset);
+      // Log("fd=%d, prev open_offset=%d", fd, file_table[fd].open_offset);
       c->GPRx = fs_lseek(fd, offset, whence);
-      Log("fd=%d, cuur open_offset=%d", fd, file_table[fd].open_offset);
+      // Log("fd=%d, cuur open_offset=%d", fd, file_table[fd].open_offset);
       c->mepc += 4;
       break;
 
     case SYS_read:
-      Log("SYS_read: fd=%d, buf=%p, count=%d", fd, buf, count);
+      Log("SYS_read: fd=%d, file=%s, buf=%p, count=%d", fd, fs_name(fd), buf, count);
       if (file_table[fd].read != NULL) {
         c->GPRx = file_table[fd].read(buf, 0, count);
       } else {
@@ -59,7 +59,7 @@ void do_syscall(Context *c) {
       break;
 
     case SYS_write:
-      Log("SYS_write: fd=%d, buf=%p, count=%d", fd, buf, count);
+      Log("SYS_write: fd=%d, file=%s, buf=%p, count=%d", fd, fs_name(fd), buf, count);
       if (file_table[fd].write != NULL) {
         c->GPRx = file_table[fd].write(buf, file_table[fd].open_offset, count);
       } else {
