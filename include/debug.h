@@ -3,7 +3,7 @@
 
 #include <common.h>
 
-// #define NANOS_DEBUG
+#define NANOS_DEBUG
 
 #ifdef NANOS_DEBUG
 #define Log(format, ...) \

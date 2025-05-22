@@ -1,6 +1,6 @@
 #include <fs.h>
 
-enum {FD_STDIN, FD_STDOUT, FD_STDERR, FD_FB, FD_EVENT, FD_DISP};
+enum {FD_STDIN, FD_STDOUT, FD_STDERR, FD_FB, FD_EVENT, FD_DISP, FD_IOE};
 
 size_t invalid_read(void *buf, size_t offset, size_t len) {
   panic("should not reach here");
@@ -16,6 +16,8 @@ extern size_t serial_write(const void *buf, size_t offset, size_t len);
 extern size_t events_read(void *buf, size_t offset, size_t len);
 extern size_t dispinfo_read(void *buf, size_t offset, size_t len);
 extern size_t fb_write(const void *buf, size_t offset, size_t len);
+extern size_t am_ioe_read(void *buf, size_t offset, size_t len);
+extern size_t am_ioe_write(const void *buf, size_t offset, size_t len);
 
 /* This is the information about all files in disk. */
 Finfo file_table[] __attribute__((used)) = {
@@ -25,6 +27,7 @@ Finfo file_table[] __attribute__((used)) = {
   [FD_FB]     = {"/dev/fb", 0, 0, 0, invalid_read, fb_write},
   [FD_EVENT]  = {"/dev/events", 0, 0, 0, events_read, invalid_write},
   [FD_DISP]   = {"/proc/dispinfo", 0, 0, 0, dispinfo_read, invalid_write},
+  [FD_IOE]    = {"/dev/am_ioe", 128, 0, 0, am_ioe_read, am_ioe_write},
 #include "files.h"
 };
 
