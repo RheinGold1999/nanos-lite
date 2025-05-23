@@ -3,11 +3,12 @@
 static Context* do_event(Event e, Context* c) {
   switch (e.event) {
     case EVENT_YIELD: 
-      Log("EVENT_YIELD: cause = %d", c->mcause);
-      c->mepc += 4;
+      // Log("EVENT_YIELD: cause = %d", c->mcause);
+      extern Context *schedule(Context *prev);
+      c = schedule(c);
       break;
     case EVENT_SYSCALL:
-      Log("EVENT_SYSCALL: cause = %d", c->mcause);
+      // Log("EVENT_SYSCALL: cause = %d", c->mcause);
       extern void do_syscall(Context *c);
       do_syscall(c);
       break;
