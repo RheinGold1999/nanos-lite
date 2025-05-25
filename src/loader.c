@@ -14,7 +14,7 @@ extern int fs_open(const char *pathname, int flags, int mode);
 extern size_t fs_read(int fd, void *buf, size_t len);
 extern int fs_close(int fd);
 
-static uintptr_t loader(PCB *pcb, const char *filename) {
+uintptr_t loader(PCB *pcb, const char *filename) {
   // TODO();
 
   // extern size_t ramdisk_read(void *buf, size_t offset, size_t len);

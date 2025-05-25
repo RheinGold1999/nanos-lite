@@ -1,6 +1,7 @@
 #include <common.h>
 #include "syscall.h"
 #include "fs.h"
+#include "proc.h"
 
 void do_syscall(Context *c) {
   uintptr_t a[4];
@@ -79,10 +80,11 @@ void do_syscall(Context *c) {
     case SYS_execve:
       const char *fname = (const char *)c->GPR2;
       Log("SYS_execve: filename=%s", fname);
-      // char * const argv[] = (char * const *)c->GPR3;
-      // char * const envp[] = (char * const *)c->GPR4;
-      extern void naive_uload(void *pcb, const char *filename);
-      naive_uload(NULL, fname);
+      char * const *argv = (char * const *)c->GPR3;
+      char * const *envp = (char * const *)c->GPR4;
+      extern void context_uload(PCB *p, const char *filename, char *const argv[], char *const envp[]);
+      context_uload(current, fname, argv, envp);
+      c->GPRx= 0;
       break;
 
     default: panic("Unhandled syscall ID = %d", a[0]);
