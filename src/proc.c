@@ -31,31 +31,28 @@ void context_uload(PCB *p, const char *filename, char *const argv[], char *const
 
   extern void *new_page(size_t nr_page);
   char *sp = new_page(8);
+  // char *sp = (char *)heap.end;
 
   int argc = 0;
   while (argv != NULL && argv[argc] != NULL) {
     argc++;
   }
-  char **argv_tmp = NULL;
-  if (argc > 0) {
-    for (int i = 0; i < argc; ++i) {
-      sp -= (strlen(argv[i]) + 1);
-      strcpy(sp, argv[i]);
-      *(argv_tmp + i) = sp;
-    }
+  char *argv_tmp[argc];
+  for (int i = 0; i < argc; ++i) {
+    sp -= (strlen(argv[i]) + 1);
+    strcpy(sp, argv[i]);
+    argv_tmp[i] = sp;
   }
 
   int envp_nr = 0;
   while (envp != NULL && envp[envp_nr] != NULL) {
     envp_nr++;
   }
-  char **envp_tmp = NULL;
-  if (envp_nr > 0) {
-    for (int i = 0; i < envp_nr; ++i) {
-      sp -= (strlen(envp[i]) + 1);
-      strcpy(sp, envp[i]);
-      *(envp_tmp + i) = sp;
-    }
+  char *envp_tmp[envp_nr];
+  for (int i = 0; i < envp_nr; ++i) {
+    sp -= (strlen(envp[i]) + 1);
+    strcpy(sp, envp[i]);
+    envp_tmp[i] = sp;
   }
 
   sp -= sizeof(char *);
@@ -71,17 +68,28 @@ void context_uload(PCB *p, const char *filename, char *const argv[], char *const
   memcpy(sp, argv_tmp, sizeof(char *) * argc);
 
   sp -= sizeof(argc);
-  memset(sp, argc, sizeof(argc));
+  // memset(sp, argc, sizeof(argc));
+  *((int *)sp) = argc;
 
   cxt->GPRx = (uintptr_t)sp;
+  Log("filename = %s, sp = %p", filename, sp);
+  Log("filename = %s, argc = %d", filename, argc);
+  for (int i = 0; i < argc; ++i) {
+    Log("filename = %s, argv[%d] = %s", filename, i, argv[i]);
+  }
   p->cp = cxt;
+  // Log("cxt->mepc = %p", cxt->mepc);
 }
 
 void init_proc() {
   context_kload(&pcb[0], hello_fun, (void *)0L);
   // context_kload(&pcb[1], hello_fun, (void *)1L);
   // context_uload(&pcb[0], "/bin/hello");
-  context_uload(&pcb[1], "/bin/exec", NULL, NULL);
+
+  char *fname = "/bin/exec";
+  char *const argv[] = {fname, NULL};
+  char *const envp[] = {NULL};
+  context_uload(&pcb[1], fname, argv, envp);
   switch_boot_pcb();
 
   yield();
@@ -90,7 +98,6 @@ void init_proc() {
   // load program here
   // extern void naive_uload(PCB *pcb, const char *filename);
   // naive_uload(NULL, "/bin/menu");
-
 }
 
 Context* schedule(Context *prev) {
