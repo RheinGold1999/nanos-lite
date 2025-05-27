@@ -115,3 +115,7 @@ Context* schedule(Context *prev) {
   return current->cp;
 }
 
+Context* get_cur_cxt() {
+  return current->cp;
+}
+

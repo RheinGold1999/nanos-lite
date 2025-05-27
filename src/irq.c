@@ -1,4 +1,5 @@
 #include <common.h>
+#include "syscall.h"
 
 static Context* do_event(Event e, Context* c) {
   switch (e.event) {
@@ -11,6 +12,10 @@ static Context* do_event(Event e, Context* c) {
       // Log("EVENT_SYSCALL: cause = %d", c->mcause);
       extern void do_syscall(Context *c);
       do_syscall(c);
+      if (c->mcause == SYS_execve) {
+        extern Context *get_cur_cxt();
+        c = get_cur_cxt();
+      }
       break;
     default: panic("Unhandled event ID = %d", e.event);
   }

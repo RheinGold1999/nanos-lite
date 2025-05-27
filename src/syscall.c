@@ -84,7 +84,6 @@ void do_syscall(Context *c) {
       char * const *envp = (char * const *)c->GPR4;
       extern void context_uload(PCB *p, const char *filename, char *const argv[], char *const envp[]);
       context_uload(current, fname, argv, envp);
-      memcpy(c, current->cp, sizeof(Context));
       // Log("c = %p, c->mepc = %p", c, c->mepc);
       break;
 
