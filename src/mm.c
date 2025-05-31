@@ -3,13 +3,15 @@
 static void *pf = NULL;
 
 void* new_page(size_t nr_page) {
-  pf = pf + nr_page * 4 * 1024;
-  return pf;
+  void *pf_ori = pf;
+  pf = pf_ori + nr_page * PGSIZE;
+  memset(pf_ori, 0, nr_page * PGSIZE);
+  return pf_ori;
 }
 
 #ifdef HAS_VME
 static void* pg_alloc(int n) {
-  size_t nr_page = ROUNDUP(n, PGSIZE);
+  size_t nr_page = ROUNDUP(n, PGSIZE) / PGSIZE;
   return new_page(nr_page);
 }
 #endif
